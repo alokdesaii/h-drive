@@ -27,7 +27,7 @@ export default function AccessPage() {
     return (
       <li>
         <button onClick={() => setSelected(f.id)} style={{ paddingLeft: 8 + depth * 16 }}
-          className={`flex h-9 w-full items-center gap-2 rounded-md pr-2 text-left text-[13px] ${selected === f.id ? 'bg-navy/8 font-medium text-navy' : 'text-ink/80 hover:bg-mist'}`}>
+          className={`flex h-9 w-full items-center gap-2 rounded-md pr-2 text-left text-[13px] ${selected === f.id ? 'bg-navy/8 font-medium text-accent' : 'text-fg/80 hover:bg-mist'}`}>
           <span onClick={e => { e.stopPropagation(); setOpen(s => { const n = new Set(s); n.has(f.id) ? n.delete(f.id) : n.add(f.id); return n }) }}
             className={`grid h-5 w-5 place-items-center rounded text-muted hover:bg-navy/10 ${kids.length ? '' : 'invisible'}`}>
             <ChevronRight size={13} className={isOpen ? 'rotate-90' : ''} />
@@ -58,7 +58,7 @@ export default function AccessPage() {
         <section className="min-w-0 space-y-6">
           <div className="rounded-xl border border-line">
             <header className="flex items-center gap-3 border-b border-line bg-gradient-to-r from-navy/[0.04] to-teal/[0.06] px-6 py-4">
-              <div className="grid h-10 w-10 place-items-center rounded-md bg-paper ring-1 ring-line"><ItemIcon item={current} size={20} /></div>
+              <div className="grid h-10 w-10 place-items-center rounded-md bg-surface ring-1 ring-line"><ItemIcon item={current} size={20} /></div>
               <div>
                 <h2 className="text-[15px] font-semibold">{current.name}</h2>
                 <p className="text-[12px] text-muted">{path} · {current.itemCount} items</p>
@@ -72,15 +72,15 @@ export default function AccessPage() {
             <dl className="mt-4 grid grid-cols-2 gap-3">
               {ROLE_HELP.map(([r, d], i) => (
                 <div key={r} className="rounded-lg bg-mist px-4 py-3">
-                  <dt className="flex items-center gap-2 text-[13px] font-medium text-navy">
+                  <dt className="flex items-center gap-2 text-[13px] font-medium text-accent">
                     <span className="flex gap-0.5">{ROLE_HELP.map((_, j) => <span key={j} className={`h-1.5 w-3 rounded-[1px] ${j <= i ? 'bg-teal' : 'bg-line'}`} />)}</span>
                     {r}
                   </dt>
-                  <dd className="mt-1 text-[12.5px] text-ink/70">{d}</dd>
+                  <dd className="mt-1 text-[12.5px] text-fg/70">{d}</dd>
                 </div>
               ))}
             </dl>
-            <p className="mt-4 text-[12px] text-muted">Admins can manage everything in H Drive. Change admins from <span className="font-medium text-navy">Users</span>.</p>
+            <p className="mt-4 text-[12px] text-muted">Admins can manage everything in H Drive. Change admins from <span className="font-medium text-accent">Users</span>.</p>
           </div>
         </section>
       </div>

@@ -26,7 +26,7 @@ export function DetailsDrawer({ id, onClose }: { id: string; onClose: () => void
     <>
       {/* no backdrop: the list stays clickable so users can flick between files */}
       <aside role="dialog" aria-label={`${item.name} details`}
-        className="fixed inset-y-0 right-0 z-50 flex w-[440px] max-w-full flex-col border-l border-line bg-paper shadow-[-12px_0_40px_rgba(2,6,23,0.08)] animate-[slidein_.18s_ease-out]">
+        className="fixed inset-y-0 right-0 z-50 flex w-[440px] max-w-full flex-col border-l border-line bg-surface shadow-[-12px_0_40px_rgba(2,6,23,0.08)] animate-[slidein_.18s_ease-out]">
         <header className="px-6 pt-5">
           <div className="flex items-start gap-3">
             <div className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-mist"><ItemIcon item={item} size={20} /></div>
@@ -34,7 +34,7 @@ export function DetailsDrawer({ id, onClose }: { id: string; onClose: () => void
               <h2 className="truncate text-[15px] font-semibold">{item.name}</h2>
               <p className="truncate text-[12px] text-muted">{location}</p>
             </div>
-            <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-md text-muted hover:bg-mist hover:text-ink" aria-label="Close"><X size={17} /></button>
+            <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-md text-muted hover:bg-mist hover:text-fg" aria-label="Close"><X size={17} /></button>
           </div>
           <div className="mt-4 flex items-center gap-1">
             {item.kind === 'document' && <Button variant="primary"><Eye size={15} /> Open</Button>}
@@ -53,7 +53,7 @@ export function DetailsDrawer({ id, onClose }: { id: string; onClose: () => void
           <div className="mt-5 flex gap-5 border-b border-line">
             {tabs.map(t => (
               <button key={t} onClick={() => setTab(t)}
-                className={`-mb-px border-b-2 pb-2.5 text-[13px] font-medium ${tab === t ? 'border-teal text-navy' : 'border-transparent text-muted hover:text-ink'}`}>
+                className={`-mb-px border-b-2 pb-2.5 text-[13px] font-medium ${tab === t ? 'border-teal text-accent' : 'border-transparent text-muted hover:text-fg'}`}>
                 {t}
               </button>
             ))}
@@ -71,7 +71,7 @@ export function DetailsDrawer({ id, onClose }: { id: string; onClose: () => void
 }
 
 const IconBtn = ({ icon: I, label }: { icon: typeof X; label: string }) =>
-  <button title={label} aria-label={label} className="grid h-9 w-9 place-items-center rounded-md text-ink/70 hover:bg-mist hover:text-ink"><I size={16} strokeWidth={1.75} /></button>
+  <button title={label} aria-label={label} className="grid h-9 w-9 place-items-center rounded-md text-fg/70 hover:bg-mist hover:text-fg"><I size={16} strokeWidth={1.75} /></button>
 
 function Details({ item }: { item: Item }) {
   const rows: [string, React.ReactNode][] = item.kind === 'document' ? [
@@ -90,7 +90,7 @@ function Details({ item }: { item: Item }) {
     <section>
       <div className="flex items-center justify-between">
         <h3 className="text-[12px] font-medium uppercase tracking-wider text-muted">Properties</h3>
-        <button className="inline-flex items-center gap-1 text-[12.5px] font-medium text-navy hover:underline"><Pencil size={13} /> Edit</button>
+        <button className="inline-flex items-center gap-1 text-[12.5px] font-medium text-accent hover:underline"><Pencil size={13} /> Edit</button>
       </div>
       <dl className="mt-3 divide-y divide-line">
         {rows.map(([k, v]) => (
@@ -125,11 +125,11 @@ function Versions({ id }: { id: string }) {
     <ol className="relative space-y-1 before:absolute before:bottom-4 before:left-[11px] before:top-4 before:w-px before:bg-line">
       {versions.map((v, i) => (
         <li key={v.number} className="group relative flex gap-3 rounded-md py-2 pr-2">
-          <span className={`relative z-10 mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-sm text-[10.5px] font-semibold ${i === 0 ? 'bg-navy text-paper' : 'bg-paper text-ink ring-1 ring-line'}`}>{v.number}</span>
+          <span className={`relative z-10 mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-sm text-[10.5px] font-semibold ${i === 0 ? 'bg-navy text-paper' : 'bg-surface text-fg ring-1 ring-line'}`}>{v.number}</span>
           <div className="min-w-0 flex-1 text-[13px]">
-            <div className="flex items-center gap-2 font-medium">Version {v.number}{i === 0 && <span className="rounded-sm bg-teal/12 px-1.5 text-[11px] text-[#00766f]">Current</span>}</div>
+            <div className="flex items-center gap-2 font-medium">Version {v.number}{i === 0 && <span className="rounded-sm bg-teal/12 px-1.5 text-[11px] text-teal-fg">Current</span>}</div>
             <div className="text-[12px] text-muted">{v.uploadedBy.name} · {fmtDateTime(v.uploadedAt)} · {fmtSize(v.size)}</div>
-            {v.note && <div className="mt-1 text-[12px] text-ink/70">{v.note}</div>}
+            {v.note && <div className="mt-1 text-[12px] text-fg/70">{v.note}</div>}
           </div>
           <div className="flex opacity-0 group-hover:opacity-100">
             <IconBtn icon={Download} label="Download this version" />
@@ -150,7 +150,7 @@ export function Access({ id }: { id: string }) {
     <section>
       <div className="flex gap-2">
         <input placeholder="Add people by email" className="h-9 flex-1 rounded-md border border-line px-3 text-[13px] outline-none placeholder:text-muted focus:border-teal" />
-        <select className="h-9 rounded-md border border-line bg-paper px-2 text-[13px]">{ROLES.map(r => <option key={r}>{r}</option>)}</select>
+        <select className="h-9 rounded-md border border-line bg-surface px-2 text-[13px]">{ROLES.map(r => <option key={r}>{r}</option>)}</select>
         <Button variant="primary">Share</Button>
       </div>
       <ul className="mt-5 divide-y divide-line">
@@ -189,8 +189,8 @@ function ActivityList({ id }: { id: string }) {
         <li key={a.id} className="flex gap-3 text-[13px]">
           <Avatar user={a.user} size={28} />
           <div>
-            <div><span className="font-medium">{a.user.name}</span> <span className="text-ink/70">{verb(a.action)}</span> <span className="font-medium">{a.entityName}</span></div>
-            {a.details && <div className="text-[12px] text-ink/70">{a.details}</div>}
+            <div><span className="font-medium">{a.user.name}</span> <span className="text-fg/70">{verb(a.action)}</span> <span className="font-medium">{a.entityName}</span></div>
+            {a.details && <div className="text-[12px] text-fg/70">{a.details}</div>}
             <div className="text-[12px] text-muted">{fmtDateTime(a.at)}</div>
           </div>
         </li>

@@ -46,7 +46,7 @@ export default function AuditPage() {
         <Select value={f.action} onChange={v => set('action', v)} placeholder="All actions" options={AUDIT_ACTIONS.map(a => [a, label(a)])} />
         <Select value={f.entity} onChange={v => set('entity', v)} placeholder="All items" options={[['document', 'Documents'], ['folder', 'Folders'], ['user', 'Users']]} />
         <Select value={f.userId} onChange={v => set('userId', v)} placeholder="Anyone" options={users.map(u => [u.id, u.name])} />
-        {active && <button onClick={() => { setF({}); setPage(0) }} className="inline-flex h-9 items-center gap-1 px-2 text-[12.5px] font-medium text-navy hover:underline"><X size={14} /> Clear filters</button>}
+        {active && <button onClick={() => { setF({}); setPage(0) }} className="inline-flex h-9 items-center gap-1 px-2 text-[12.5px] font-medium text-accent hover:underline"><X size={14} /> Clear filters</button>}
       </div>
 
       <div className="mt-4 overflow-hidden rounded-xl border border-line">
@@ -65,11 +65,11 @@ export default function AuditPage() {
               const Icon = ENTITY_ICON[a.entity]
               return (
                 <tr key={a.id} className="hover:bg-teal/[0.04]">
-                  <td className="pl-5 tabular-nums text-ink/70">{fmtDateTime(a.at)}</td>
+                  <td className="pl-5 tabular-nums text-fg/70">{fmtDateTime(a.at)}</td>
                   <td><span className="flex items-center gap-2"><Avatar user={a.user} size={24} />{a.user.name}</span></td>
                   <td><span className="inline-flex items-center gap-2"><span className={`h-1.5 w-1.5 rounded-full ${tone(a.action)}`} />{label(a.action)}</span></td>
-                  <td><span className="flex items-center gap-2"><Icon size={15} strokeWidth={1.75} className="shrink-0 text-navy/70" /><span className="truncate">{a.entityName}</span></span></td>
-                  <td className="pr-5 text-ink/70">{a.details ?? <span className="text-muted">—</span>}</td>
+                  <td><span className="flex items-center gap-2"><Icon size={15} strokeWidth={1.75} className="shrink-0 text-accent/70" /><span className="truncate">{a.entityName}</span></span></td>
+                  <td className="pr-5 text-fg/70">{a.details ?? <span className="text-muted">—</span>}</td>
                 </tr>
               )
             })}
@@ -92,7 +92,7 @@ export default function AuditPage() {
 function Select({ value, onChange, placeholder, options }: { value?: string; onChange: (v: string) => void; placeholder: string; options: string[][] }) {
   return (
     <select value={value ?? ''} onChange={e => onChange(e.target.value)}
-      className={`h-9 rounded-md border px-2.5 text-[13px] outline-none focus:border-teal ${value ? 'border-navy/40 bg-navy/5 text-navy' : 'border-line bg-paper'}`}>
+      className={`h-9 rounded-md border px-2.5 text-[13px] outline-none focus:border-teal ${value ? 'border-navy/40 bg-navy/5 text-accent' : 'border-line bg-surface'}`}>
       <option value="">{placeholder}</option>
       {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
     </select>
@@ -101,5 +101,5 @@ function Select({ value, onChange, placeholder, options }: { value?: string; onC
 
 const PageBtn = ({ disabled, onClick, label, children }: { disabled: boolean; onClick: () => void; label: string; children: React.ReactNode }) => (
   <button disabled={disabled} onClick={onClick} aria-label={label}
-    className="grid h-8 w-8 place-items-center rounded-md border border-line text-ink hover:border-navy/40 hover:text-navy disabled:opacity-40">{children}</button>
+    className="grid h-8 w-8 place-items-center rounded-md border border-line text-fg hover:border-navy/40 hover:text-accent disabled:opacity-40">{children}</button>
 )

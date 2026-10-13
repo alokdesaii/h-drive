@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import {
-  Archive, Bell, BellRing, ChevronsLeft, Folder, LayoutDashboard, ScrollText,
-  Search, Settings, ShieldCheck, Trash2, Users,
+  Archive, Bell, BellRing, ChevronsLeft, Folder, LayoutDashboard, Monitor, Moon, ScrollText,
+  Search, Settings, ShieldCheck, Sun, Trash2, Users,
 } from 'lucide-react'
 import Documents from './pages/Documents'
 import AccessPage from './pages/AccessPage'
@@ -91,16 +91,44 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
   )
 }
 
+// Light / dark / system. Choice is a per-browser convenience, so localStorage is fine (guarded: it can throw).
+type Theme = 'light' | 'dark' | 'system'
+const THEMES: [Theme, typeof Sun, string][] = [['light', Sun, 'Light'], ['dark', Moon, 'Dark'], ['system', Monitor, 'System']]
+function applyTheme(t: Theme) {
+  if (t === 'system') document.documentElement.removeAttribute('data-theme')
+  else document.documentElement.dataset.theme = t
+}
+function ThemeToggle() {
+  const [theme, setTheme] = useState<Theme>(() => {
+    try { return (localStorage.getItem('theme') as Theme) || 'system' } catch { return 'system' }
+  })
+  useEffect(() => {
+    applyTheme(theme)
+    try { localStorage.setItem('theme', theme) } catch { /* private mode */ }
+  }, [theme])
+  return (
+    <div className="flex rounded-md border border-line p-0.5" role="radiogroup" aria-label="Theme">
+      {THEMES.map(([t, Icon, label]) => (
+        <button key={t} role="radio" aria-checked={theme === t} aria-label={label} title={label} onClick={() => setTheme(t)}
+          className={`grid h-7 w-7 place-items-center rounded-sm ${theme === t ? 'bg-mist text-accent' : 'text-muted hover:text-fg'}`}>
+          <Icon size={14} strokeWidth={1.75} />
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function Topbar() {
   return (
     <header className="h-16 shrink-0 border-b border-line flex items-center gap-4 px-8">
-      <button className="flex h-9 w-full max-w-md items-center gap-2.5 rounded-md border border-line bg-paper px-3 text-[13px] text-muted hover:border-muted/60">
+      <button className="flex h-9 w-full max-w-md items-center gap-2.5 rounded-md border border-line bg-surface px-3 text-[13px] text-muted hover:border-muted/60">
         <Search size={15} />
         <span className="flex-1 text-left">Search files, folders, people…</span>
         <kbd className="rounded border border-line px-1.5 text-[11px] font-sans">⌘K</kbd>
       </button>
       <div className="ml-auto flex items-center gap-2">
-        <button className="relative grid h-9 w-9 place-items-center rounded-md text-ink/70 hover:bg-mist" aria-label="Alerts">
+        <ThemeToggle />
+        <button className="relative grid h-9 w-9 place-items-center rounded-md text-fg/70 hover:bg-mist" aria-label="Alerts">
           <Bell size={17} strokeWidth={1.75} />
           <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-teal" />
         </button>

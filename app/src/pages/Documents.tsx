@@ -47,7 +47,7 @@ export default function Documents() {
 
   const SortHead = ({ k, children, className = '' }: { k: SortKey; children: string; className?: string }) => (
     <button onClick={() => setSort(s => ({ key: k, asc: s.key === k ? !s.asc : true }))}
-      className={`inline-flex items-center gap-1 hover:text-ink ${className}`}>
+      className={`inline-flex items-center gap-1 hover:text-fg ${className}`}>
       {children}
       {sort.key === k && (sort.asc ? <ArrowUp size={12} /> : <ArrowDown size={12} />)}
     </button>
@@ -61,11 +61,11 @@ export default function Documents() {
 
       {/* Breadcrumbs */}
       <nav className={`flex items-center gap-1 text-[13px] text-muted ${folderId ? '' : 'invisible'}`}>
-        <Link to="/documents" className="hover:text-ink">Documents</Link>
+        <Link to="/documents" className="hover:text-fg">Documents</Link>
         {path.map(f => (
           <span key={f.id} className="flex items-center gap-1">
             <ChevronRight size={13} />
-            <Link to={`/documents/${f.id}`} className={f.id === folderId ? 'text-ink' : 'hover:text-ink'}>{f.name}</Link>
+            <Link to={`/documents/${f.id}`} className={f.id === folderId ? 'text-fg' : 'hover:text-fg'}>{f.name}</Link>
           </span>
         ))}
       </nav>
@@ -108,7 +108,7 @@ export default function Documents() {
             <div className="ml-auto flex rounded-md border border-line p-0.5">
               {([['list', List], ['grid', LayoutGrid]] as const).map(([v, Icon]) => (
                 <button key={v} onClick={() => setView(v)} aria-label={`${v} view`}
-                  className={`grid h-7 w-8 place-items-center rounded ${view === v ? 'bg-mist text-ink' : 'text-muted hover:text-ink'}`}>
+                  className={`grid h-7 w-8 place-items-center rounded ${view === v ? 'bg-mist text-fg' : 'text-muted hover:text-fg'}`}>
                   <Icon size={15} />
                 </button>
               ))}
@@ -146,15 +146,15 @@ export default function Documents() {
                         {i.kind === 'folder' && <span className="text-[12px] text-muted">{i.itemCount}</span>}
                       </div>
                     </td>
-                    <td className="text-ink/70">{i.kind === 'document' ? i.type : 'Folder'}</td>
+                    <td className="text-fg/70">{i.kind === 'document' ? i.type : 'Folder'}</td>
                     <td>{i.kind === 'document' ? <StatusBadge status={i.status} /> : <Dash />}</td>
                     <td>
                       <div className="flex items-center gap-2">
                         <Avatar user={i.modifiedBy} size={22} />
-                        <span className="text-ink/70">{fmtDate(i.modifiedAt)}</span>
+                        <span className="text-fg/70">{fmtDate(i.modifiedAt)}</span>
                       </div>
                     </td>
-                    <td className="pr-4 text-right tabular-nums text-ink/70">{i.kind === 'document' ? fmtSize(i.size) : <Dash />}</td>
+                    <td className="pr-4 text-right tabular-nums text-fg/70">{i.kind === 'document' ? fmtSize(i.size) : <Dash />}</td>
                     <td className="pr-2"><RowMenu item={i} onOpen={() => open(i)} /></td>
                   </tr>
                 )
@@ -204,7 +204,7 @@ export default function Documents() {
 function RowMenu({ item, onOpen }: { item: Item; onOpen: () => void }) {
   return (
     <Menu trigger={
-      <button className="grid h-8 w-8 place-items-center rounded-md text-muted opacity-0 hover:bg-paper hover:text-ink group-hover:opacity-100 aria-expanded:opacity-100" aria-label="More actions">
+      <button className="grid h-8 w-8 place-items-center rounded-md text-muted opacity-0 hover:bg-surface hover:text-fg group-hover:opacity-100 aria-expanded:opacity-100" aria-label="More actions">
         <MoreHorizontal size={16} />
       </button>
     }>
@@ -226,7 +226,7 @@ function RowMenu({ item, onOpen }: { item: Item; onOpen: () => void }) {
 function Chip({ active, children, onClick }: { active: boolean; children: string; onClick: () => void }) {
   return (
     <button onClick={onClick}
-      className={`h-8 rounded-sm border px-3 text-[12.5px] font-medium transition-colors ${active ? 'border-navy bg-navy text-paper' : 'border-line text-ink/70 hover:border-muted/60 hover:text-ink'}`}>
+      className={`h-8 rounded-sm border px-3 text-[12.5px] font-medium transition-colors ${active ? 'border-navy bg-navy text-paper' : 'border-line text-fg/70 hover:border-muted/60 hover:text-fg'}`}>
       {children}
     </button>
   )
@@ -253,7 +253,7 @@ function Skeleton() {
 function Empty({ filtered }: { filtered: boolean }) {
   return (
     <div className="grid place-items-center rounded-xl border border-dashed border-line py-20 text-center">
-      <div className="grid h-12 w-12 place-items-center rounded-sm bg-mist"><UploadCloud size={20} className="text-ink/60" /></div>
+      <div className="grid h-12 w-12 place-items-center rounded-sm bg-mist"><UploadCloud size={20} className="text-fg/60" /></div>
       <div className="mt-4 text-[15px] font-medium">{filtered ? 'Nothing matches this filter' : 'This folder is empty'}</div>
       <p className="mt-1 max-w-xs text-[13px] text-muted">
         {filtered ? 'Try another document type, or clear the filter.' : 'Drag files here, or use New to upload files or create a subfolder.'}

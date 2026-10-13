@@ -1,15 +1,23 @@
 @import "tailwindcss";
 
-/* Brand tokens — black & white base, navy/teal as accents only */
+/* Brand tokens. Constant colours live in @theme; theme-aware roles (surface, fg…) switch with light/dark below. */
+@theme inline {
+  --color-surface: var(--surface);   /* cards, page, drawer */
+  --color-canvas: var(--canvas);     /* dashboard backdrop behind cards */
+  --color-fg: var(--fg);             /* primary text */
+  --color-muted: var(--muted);       /* secondary text, icons */
+  --color-line: var(--line);         /* hairline borders */
+  --color-mist: var(--mist);         /* subtle fills, hover */
+  --color-accent: var(--accent);     /* navy as text/links: brightened in dark */
+  --color-teal-fg: var(--teal-fg);   /* teal as text on light fills */
+}
+
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
   --color-ink: #020617;      /* primary text, strong surfaces */
   --color-night: #000c14;    /* deepest black */
-  --color-muted: #94a3b8;    /* secondary text, icons */
-  --color-line: #e2e8f0;     /* hairline borders */
-  --color-mist: #f1f5f9;     /* subtle fills, hover */
-  --color-paper: #ffffff;
+  --color-paper: #ffffff;    /* always white: text/overlays on navy & teal */
 
   --color-navy: #023e63;     /* accent: primary actions, links */
   --color-teal: #00bfb3;     /* accent: focus, selection, indicators */
@@ -21,9 +29,28 @@
   --radius-xl: 10px;
 }
 
+:root {
+  color-scheme: light;
+  --surface: #ffffff; --canvas: #f1f5f9; --fg: #020617; --muted: #94a3b8;
+  --line: #e2e8f0; --mist: #f1f5f9; --accent: #023e63; --teal-fg: #00766f;
+}
+/* Dark: follows the OS unless the user picked a theme (data-theme on <html>) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface: #0d1626; --canvas: #070e1a; --fg: #e2e8f0; --muted: #8193ab;
+    --line: #1f2b3e; --mist: #152033; --accent: #6cb8ea; --teal-fg: #34d3c5;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #0d1626; --canvas: #070e1a; --fg: #e2e8f0; --muted: #8193ab;
+  --line: #1f2b3e; --mist: #152033; --accent: #6cb8ea; --teal-fg: #34d3c5;
+}
+
 html, body, #root { height: 100%; }
 body {
-  @apply bg-paper text-ink font-sans antialiased;
+  @apply bg-surface text-fg font-sans antialiased;
   font-feature-settings: "cv11", "ss01";
 }
 @keyframes slidein { from { transform: translateX(24px); opacity: 0 } }
