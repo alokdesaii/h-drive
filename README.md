@@ -21,7 +21,10 @@
 > [!NOTE]
 > **This is a frontend design prototype.** Every screen runs on mock data so it can be reviewed and approved before the backend team wires it up. Buttons and modals are visual only unless noted.
 
-<img src="docs/screens/dashboard.png" alt="Dashboard" />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screens/dashboard-dark.png" />
+  <img src="docs/screens/dashboard.png" alt="Dashboard" />
+</picture>
 
 ## Screens
 
@@ -31,6 +34,15 @@
 | **Documents:** browse folders, filter by type, list/grid views, bulk actions, drag-and-drop upload, and a details drawer (properties, versions, access, activity). | **Access:** folder tree, share by email with a role, inherited access, and a role guide. |
 | <img src="docs/screens/audit.png" alt="Audit log" /> | |
 | **Audit log:** immutable record of every action, with filters, colour-coded actions, paging and CSV export. | |
+
+### Dark mode
+
+Light, Dark or System (default), from the switch in the top bar. The choice is remembered per browser.
+
+| | |
+|---|---|
+| <img src="docs/screens/dashboard-dark.png" alt="Dashboard, dark" /> | <img src="docs/screens/documents-dark.png" alt="Documents, dark" /> |
+| <img src="docs/screens/access-dark.png" alt="Access, dark" /> | <img src="docs/screens/audit-dark.png" alt="Audit log, dark" /> |
 
 ### Status
 
@@ -55,6 +67,7 @@
 | ![](https://placehold.co/14x14/94a3b8/94a3b8.png) Slate | `#94a3b8` | Secondary text, icons |
 | ![](https://placehold.co/14x14/f1f5f9/f1f5f9.png) Mist | `#f1f5f9` | Canvas, subtle fills |
 
+- **Themes:** light + dark from one set of colour roles (`surface`, `fg`, `accent`…) in [`index.css`](app/src/index.css)
 - **Type:** Inter, light weights for hero numbers
 - **Corners:** 4 / 6 / 10px scale, all set in [`index.css`](app/src/index.css)
 - **Vocabulary:** one word per concept (*Upload*, *Share*, *Access*, *Move to trash*), defined in [`docs/model.md`](docs/model.md)
