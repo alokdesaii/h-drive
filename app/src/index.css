@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+/* Brand tokens — black & white base, navy/teal as accents only */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink: #020617;      /* primary text, strong surfaces */
+  --color-night: #000c14;    /* deepest black */
+  --color-muted: #94a3b8;    /* secondary text, icons */
+  --color-line: #e2e8f0;     /* hairline borders */
+  --color-mist: #f1f5f9;     /* subtle fills, hover */
+  --color-paper: #ffffff;
+
+  --color-navy: #023e63;     /* accent: primary actions, links */
+  --color-teal: #00bfb3;     /* accent: focus, selection, indicators */
+
+  /* Crisp-but-soft corners: one radius scale for the whole app */
+  --radius-sm: 4px;   /* pills, chips, buttons in pills */
+  --radius-md: 6px;   /* buttons, inputs, menu items */
+  --radius-lg: 10px;   /* cards, panels */
+  --radius-xl: 10px;
+}
+
+html, body, #root { height: 100%; }
+body {
+  @apply bg-paper text-ink font-sans antialiased;
+  font-feature-settings: "cv11", "ss01";
+}
+@keyframes slidein { from { transform: translateX(24px); opacity: 0 } }
+:focus-visible { outline: 2px solid var(--color-teal); outline-offset: 2px; }
