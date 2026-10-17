@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Route, Routes, useLocation } from 'react-router-dom'
+import { NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import {
-  Archive, Bell, BellRing, ChevronsLeft, Folder, LayoutDashboard, Monitor, Moon, ScrollText,
+  Archive, Bell, BellRing, ChevronDown, ChevronsLeft, LogOut, Folder, LayoutDashboard, Monitor, Moon, ScrollText,
   Search, Settings, ShieldCheck, Sun, Trash2, Users,
 } from 'lucide-react'
 import Documents from './pages/Documents'
 import AccessPage from './pages/AccessPage'
 import AuditPage from './pages/AuditPage'
 import Dashboard from './pages/Dashboard'
+import Login from './pages/Login'
+import { Menu, MenuDivider, MenuItem } from './ui'
 
 const nav = [
   { group: null, items: [
@@ -119,6 +121,7 @@ function ThemeToggle() {
 }
 
 function Topbar() {
+  const navigate = useNavigate()
   return (
     <header className="h-16 shrink-0 border-b border-line flex items-center gap-4 px-8">
       <button className="flex h-9 w-full max-w-md items-center gap-2.5 rounded-md border border-line bg-surface px-3 text-[13px] text-muted hover:border-muted/60">
@@ -133,13 +136,21 @@ function Topbar() {
           <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-teal" />
         </button>
         <div className="mx-2 h-6 w-px bg-line" />
-        <button className="flex items-center gap-2.5 rounded-md py-1 pl-1 pr-2 hover:bg-mist">
-          <span className="grid h-8 w-8 place-items-center rounded-sm bg-navy text-[12px] font-medium text-paper">AD</span>
-          <span className="text-left leading-tight">
-            <span className="block text-[13px] font-medium">Alok Desai</span>
-            <span className="block text-[11px] text-muted">Administrator</span>
-          </span>
-        </button>
+        <Menu trigger={
+          <button className="flex items-center gap-2.5 rounded-md py-1 pl-1 pr-2 hover:bg-mist">
+            <span className="grid h-8 w-8 place-items-center rounded-sm bg-navy text-[12px] font-medium text-paper">AD</span>
+            <span className="text-left leading-tight">
+              <span className="block text-[13px] font-medium">Alok Desai</span>
+              <span className="block text-[11px] text-muted">Administrator</span>
+            </span>
+            <ChevronDown size={14} className="text-muted" />
+          </button>
+        }>
+          <div className="px-2.5 py-2 text-[12px] text-muted">alok.desai@harbourandhills.com</div>
+          <MenuDivider />
+          {/* Backend: POST /auth/logout, then redirect here */}
+          <MenuItem icon={LogOut} onClick={() => navigate('/login')}>Sign out</MenuItem>
+        </Menu>
       </div>
     </header>
   )
@@ -162,6 +173,8 @@ function Placeholder() {
 
 export default function App() {
   const [collapsed, setCollapsed] = useState(false)
+  // Sign-in page sits outside the app shell. ponytail: no auth guard yet, the backend adds the redirect for signed-out users.
+  if (useLocation().pathname === '/login') return <Login />
   return (
     <div className="flex h-full">
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} />

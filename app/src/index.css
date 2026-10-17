@@ -55,3 +55,13 @@ body {
 }
 @keyframes slidein { from { transform: translateX(24px); opacity: 0 } }
 :focus-visible { outline: 2px solid var(--color-teal); outline-offset: 2px; }
+
+/* Login: navy deepening into brand night, so the brand panel flows into the form side */
+.login-brand {
+  background: linear-gradient(135deg, #023e63 0%, #012a45 45%, #000c14 100%);
+  box-shadow: inset -1px 0 0 rgba(255,255,255,0.06);
+}
+:root[data-theme="dark"] .login-form { background: #000c14; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .login-form { background: #000c14; }
+}
