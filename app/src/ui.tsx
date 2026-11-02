@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { File, FileSpreadsheet, FileText, FileType2, Folder as FolderIcon, type LucideIcon } from 'lucide-react'
+import { Check, File, FileSpreadsheet, FileText, FileType2, Folder as FolderIcon, type LucideIcon } from 'lucide-react'
 import type { DocStatus, Item, User } from './types'
 
 export const fmtSize = (b: number) =>
-  b < 1024 * 1024 ? `${Math.max(1, Math.round(b / 1024))} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`
+  b < 1024 ** 2 ? `${Math.max(1, Math.round(b / 1024))} KB`
+  : b < 1024 ** 3 ? `${(b / 1024 ** 2).toFixed(1)} MB` : `${(b / 1024 ** 3).toFixed(1)} GB`
 
 export const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
@@ -84,3 +85,38 @@ export function MenuItem({ icon: Icon, children, danger, hint, onClick }: { icon
   )
 }
 export const MenuDivider = () => <div className="my-1 h-px bg-line" />
+
+/** Modal on the native <dialog>: focus trap, Esc to close and backdrop come from the browser. */
+export function Dialog({ open, onClose, title, description, children, footer, width = 480 }: {
+  open: boolean; onClose: () => void; title: string; description?: string; children: ReactNode; footer?: ReactNode; width?: number
+}) {
+  const ref = useRef<HTMLDialogElement>(null)
+  useEffect(() => {
+    const d = ref.current!
+    if (open && !d.open) d.showModal()
+    if (!open && d.open) d.close()
+  }, [open])
+  return (
+    <dialog ref={ref} onClose={onClose} onClick={e => e.target === ref.current && onClose()} style={{ width }}
+      className="m-auto max-w-[calc(100vw-32px)] rounded-lg border border-line bg-surface p-0 text-fg shadow-[0_24px_80px_rgba(2,6,23,0.25)] backdrop:bg-night/40 backdrop:backdrop-blur-[2px]">
+      <div className="px-6 pt-5">
+        <h2 className="text-[16px] font-semibold">{title}</h2>
+        {description && <p className="mt-1 text-[13px] text-muted">{description}</p>}
+      </div>
+      <div className="px-6 py-5">{children}</div>
+      {footer && <div className="flex justify-end gap-2 border-t border-line bg-mist/50 px-6 py-3.5">{footer}</div>}
+    </dialog>
+  )
+}
+
+/** Transient confirmation. `const [toast, showToast] = useToast()` then render {toast}. */
+export function useToast() {
+  const [msg, setMsg] = useState<string | null>(null)
+  useEffect(() => { if (!msg) return; const t = setTimeout(() => setMsg(null), 3200); return () => clearTimeout(t) }, [msg])
+  const node = msg && (
+    <div role="status" className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-md bg-night px-4 py-2.5 text-[13px] text-paper shadow-lg">
+      <Check size={15} className="text-teal" /> {msg}
+    </div>
+  )
+  return [node, setMsg] as const
+}

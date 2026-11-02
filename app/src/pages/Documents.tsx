@@ -4,12 +4,14 @@ import {
   Archive, ArrowDown, ArrowUp, Bell, ChevronDown, ChevronRight, Copy, Download, FileUp, FolderInput, FolderPlus,
   FolderUp, LayoutGrid, Link2, List, MoreHorizontal, Pencil, Plus, Share2, Trash2, UploadCloud, X,
 } from 'lucide-react'
-import { folderPath, listItems, type Item } from '../api'
+import { DOC_TYPE_NAMES, folderPath, listItems, type Item } from '../api'
 import { Avatar, Button, ItemIcon, Menu, MenuDivider, MenuItem, StatusBadge, fmtDate, fmtSize } from '../ui'
 import { DetailsDrawer } from './DetailsDrawer'
+import { useFileActions, type FileActions } from '../fileActions'
+import { RESTRICTED_FOR_MEMBERS, useMe } from '../session'
+import { NoAccessPage } from './ErrorPages'
 
 type SortKey = 'name' | 'modifiedAt' | 'size'
-const TYPES = ['Contract', 'Policy', 'Report', 'General']
 
 export default function Documents() {
   const { folderId = null } = useParams()
@@ -23,12 +25,14 @@ export default function Documents() {
   const [type, setType] = useState<string | null>(null)
   const [sort, setSort] = useState<{ key: SortKey; asc: boolean }>({ key: 'name', asc: true })
   const [dragging, setDragging] = useState(false)
+  const { act, ui } = useFileActions({ folderId, items, setItems })
 
   useEffect(() => {
     setItems(null); setSelected(new Set())
     listItems(folderId).then(setItems)
   }, [folderId])
 
+  const me = useMe()
   const path = folderPath(folderId)
   const title = path.at(-1)?.name ?? 'Documents'
 
@@ -53,11 +57,14 @@ export default function Documents() {
     </button>
   )
 
+  // members can't open restricted folders (or anything inside them)
+  if (!me.isAdmin && path.some(f => RESTRICTED_FOR_MEMBERS.includes(f.id))) return <NoAccessPage folderId={folderId!} />
+
   return (
     <div className="relative min-h-full px-8 py-7"
       onDragOver={e => { e.preventDefault(); setDragging(true) }}
       onDragLeave={e => e.currentTarget === e.target && setDragging(false)}
-      onDrop={e => { e.preventDefault(); setDragging(false) }}>
+      onDrop={e => { e.preventDefault(); setDragging(false); act.dropFiles([...e.dataTransfer.files]) }}>
 
       {/* Breadcrumbs */}
       <nav className={`flex items-center gap-1 text-[13px] text-muted ${folderId ? '' : 'invisible'}`}>
@@ -77,15 +84,13 @@ export default function Documents() {
           <p className="mt-0.5 text-[13px] text-muted">{items ? `${items.length} items` : ' '}</p>
         </div>
         <div className="flex items-center gap-1">
-          {folderId && <Button><Share2 size={15} /> Share</Button>}
-          {folderId && <Button><Link2 size={15} /> Copy link</Button>}
+          {folderId && <Button onClick={() => act.share(null)}><Share2 size={15} /> Share</Button>}
+          {folderId && <Button onClick={() => act.copyLink(null)}><Link2 size={15} /> Copy link</Button>}
           <Menu trigger={<Button variant="primary" className="ml-2"><Plus size={15} /> New <ChevronDown size={14} className="-mr-1 opacity-60" /></Button>}>
-            <MenuItem icon={FolderPlus} hint="⇧N">New folder</MenuItem>
+            <MenuItem icon={FolderPlus} onClick={act.newFolder}>New folder</MenuItem>
             <MenuDivider />
-            <MenuItem icon={FileUp} hint="U">Upload files</MenuItem>
-            <MenuItem icon={FolderUp}>Upload folder</MenuItem>
-            <MenuDivider />
-            <MenuItem icon={Link2}>Add link</MenuItem>
+            <MenuItem icon={FileUp} onClick={act.uploadFiles}>Upload files</MenuItem>
+            <MenuItem icon={FolderUp} onClick={act.uploadFolder}>Upload folder</MenuItem>
           </Menu>
         </div>
       </div>
@@ -95,16 +100,16 @@ export default function Documents() {
         {selected.size > 0 ? (
           <div className="flex h-9 flex-1 items-center gap-1 rounded-md bg-navy pl-3 pr-1 text-paper">
             <span className="mr-2 text-[13px] font-medium">{selected.size} selected</span>
-            {[[Download, 'Download'], [Share2, 'Share'], [FolderInput, 'Move'], [Archive, 'Archive'], [Trash2, 'Move to trash']].map(([Icon, label]) => {
-              const I = Icon as typeof Download
-              return <button key={label as string} className="inline-flex h-7 items-center gap-1.5 rounded px-2.5 text-[12.5px] text-paper/80 hover:bg-paper/10 hover:text-paper"><I size={14} />{label as string}</button>
-            })}
+            {([[Download, 'Download', act.download], [FolderInput, 'Move', act.move], [Archive, 'Archive', act.archive], [Trash2, 'Move to trash', act.trash]] as const).map(([I, label, run]) => (
+              <button key={label} onClick={() => { run(rows.filter(r => selected.has(r.id))); if (label !== 'Download') setSelected(new Set()) }}
+                className="inline-flex h-7 items-center gap-1.5 rounded px-2.5 text-[12.5px] text-paper/80 hover:bg-paper/10 hover:text-paper"><I size={14} />{label}</button>
+            ))}
             <button onClick={() => setSelected(new Set())} className="ml-auto grid h-7 w-7 place-items-center rounded hover:bg-paper/10" aria-label="Clear selection"><X size={15} /></button>
           </div>
         ) : (
           <>
             <Chip active={!type} onClick={() => setType(null)}>All</Chip>
-            {TYPES.map(t => <Chip key={t} active={type === t} onClick={() => setType(type === t ? null : t)}>{t}</Chip>)}
+            {DOC_TYPE_NAMES.map(t => <Chip key={t} active={type === t} onClick={() => setType(type === t ? null : t)}>{t}</Chip>)}
             <div className="ml-auto flex rounded-md border border-line p-0.5">
               {([['list', List], ['grid', LayoutGrid]] as const).map(([v, Icon]) => (
                 <button key={v} onClick={() => setView(v)} aria-label={`${v} view`}
@@ -119,7 +124,7 @@ export default function Documents() {
 
       {/* Content */}
       <div className="mt-3">
-        {!items ? <Skeleton /> : rows.length === 0 ? <Empty filtered={!!type} /> : view === 'list' ? (
+        {!items ? <Skeleton /> : rows.length === 0 ? <Empty filtered={!!type} act={act} /> : view === 'list' ? (
           <table className="w-full border-separate border-spacing-0 text-[13px]">
             <thead>
               <tr className="text-left text-[12px] text-muted [&>th]:h-10 [&>th]:border-b [&>th]:border-line [&>th]:font-medium">
@@ -155,7 +160,7 @@ export default function Documents() {
                       </div>
                     </td>
                     <td className="pr-4 text-right tabular-nums text-fg/70">{i.kind === 'document' ? fmtSize(i.size) : <Dash />}</td>
-                    <td className="pr-2"><RowMenu item={i} onOpen={() => open(i)} /></td>
+                    <td className="pr-2"><RowMenu item={i} act={act} onOpen={() => open(i)} /></td>
                   </tr>
                 )
               })}
@@ -168,7 +173,7 @@ export default function Documents() {
                 className={`group cursor-pointer rounded-lg border p-4 transition-colors ${openId === i.id || selected.has(i.id) ? 'border-teal bg-teal/5' : 'border-line hover:border-muted/60'}`}>
                 <div className="flex items-start justify-between">
                   <div className="grid h-10 w-10 place-items-center rounded-md bg-mist"><ItemIcon item={i} size={20} /></div>
-                  <RowMenu item={i} onOpen={() => open(i)} />
+                  <RowMenu item={i} act={act} onOpen={() => open(i)} />
                 </div>
                 <div className="mt-4 truncate text-[13px] font-medium">{i.name}</div>
                 <div className="mt-1 flex items-center justify-between text-[12px] text-muted">
@@ -196,29 +201,31 @@ export default function Documents() {
         </div>
       )}
 
-      {openId && <DetailsDrawer id={openId} onClose={() => setParams({})} />}
+      {openId && (!items || items.some(i => i.id === openId)) && <DetailsDrawer id={openId} item={items?.find(i => i.id === openId)} act={act} onClose={() => setParams({})} />}
+      {ui}
     </div>
   )
 }
 
-function RowMenu({ item, onOpen }: { item: Item; onOpen: () => void }) {
+function RowMenu({ item, act, onOpen }: { item: Item; act: FileActions; onOpen: () => void }) {
+  const following = act.isFollowing(item)
   return (
     <Menu trigger={
-      <button className="grid h-8 w-8 place-items-center rounded-md text-muted opacity-0 hover:bg-surface hover:text-fg group-hover:opacity-100 aria-expanded:opacity-100" aria-label="More actions">
+      <button className="grid h-8 w-8 place-items-center rounded-md text-muted opacity-0 hover:bg-surface hover:text-fg group-hover:opacity-100 focus:opacity-100" aria-label="More actions">
         <MoreHorizontal size={16} />
       </button>
     }>
       <MenuItem onClick={onOpen} icon={item.kind === 'folder' ? FolderInput : Pencil}>{item.kind === 'folder' ? 'Open' : 'Details'}</MenuItem>
-      {item.kind === 'document' && <MenuItem icon={Download}>Download</MenuItem>}
-      <MenuItem icon={Share2}>Share</MenuItem>
-      <MenuItem icon={Copy}>Copy link</MenuItem>
-      <MenuItem icon={Bell}>Alert me</MenuItem>
+      <MenuItem icon={Download} onClick={() => act.download([item])}>Download</MenuItem>
+      <MenuItem icon={Share2} onClick={() => act.share(item)}>Share</MenuItem>
+      <MenuItem icon={Copy} onClick={() => act.copyLink(item)}>Copy link</MenuItem>
+      <MenuItem icon={Bell} onClick={() => act.toggleFollow(item)} hint={following ? 'On' : undefined}>{following ? 'Stop alerts' : 'Alert me'}</MenuItem>
       <MenuDivider />
-      <MenuItem icon={Pencil}>Rename</MenuItem>
-      <MenuItem icon={FolderInput}>Move</MenuItem>
-      <MenuItem icon={Archive}>Archive</MenuItem>
+      <MenuItem icon={Pencil} onClick={() => act.rename(item)}>Rename</MenuItem>
+      <MenuItem icon={FolderInput} onClick={() => act.move([item])}>Move</MenuItem>
+      <MenuItem icon={Archive} onClick={() => act.archive([item])}>Archive</MenuItem>
       <MenuDivider />
-      <MenuItem icon={Trash2} danger>Move to trash</MenuItem>
+      <MenuItem icon={Trash2} danger onClick={() => act.trash([item])}>Move to trash</MenuItem>
     </Menu>
   )
 }
@@ -250,7 +257,7 @@ function Skeleton() {
   )
 }
 
-function Empty({ filtered }: { filtered: boolean }) {
+function Empty({ filtered, act }: { filtered: boolean; act: FileActions }) {
   return (
     <div className="grid place-items-center rounded-xl border border-dashed border-line py-20 text-center">
       <div className="grid h-12 w-12 place-items-center rounded-sm bg-mist"><UploadCloud size={20} className="text-fg/60" /></div>
@@ -258,7 +265,7 @@ function Empty({ filtered }: { filtered: boolean }) {
       <p className="mt-1 max-w-xs text-[13px] text-muted">
         {filtered ? 'Try another document type, or clear the filter.' : 'Drag files here, or use New to upload files or create a subfolder.'}
       </p>
-      {!filtered && <div className="mt-5 flex gap-2"><Button variant="secondary"><FolderPlus size={15} /> New folder</Button><Button variant="primary"><FileUp size={15} /> Upload files</Button></div>}
+      {!filtered && <div className="mt-5 flex gap-2"><Button variant="secondary" onClick={act.newFolder}><FolderPlus size={15} /> New folder</Button><Button variant="primary" onClick={act.uploadFiles}><FileUp size={15} /> Upload files</Button></div>}
     </div>
   )
 }

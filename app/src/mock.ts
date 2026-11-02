@@ -1,4 +1,4 @@
-import type { AccessGrant, Activity, Document, Folder, Item, User } from './types'
+import type { AccessGrant, Activity, AlertEvent, AlertPrefs, Document, DocumentType, Folder, Item, Member, Notification, RemovedItem, Subscription, User, WorkspaceSettings } from './types'
 
 export const users: User[] = [
   { id: 'u1', name: 'Alok Desai', email: 'alok.desai@harbourandhills.com', isAdmin: true },
@@ -78,3 +78,122 @@ export const audit: Activity[] = Array.from({ length: 60 }, (_, i) => {
     : entity === 'folder' ? folders[i % folders.length].name : docs[(i * 3) % docs.length].name
   return { id: `au${i}`, at: d(Math.floor(i / 4), 17 - (i % 8)), user: users[(i * 3) % users.length], action, entity, entityName, details }
 })
+
+// Users screen: everyone in the workspace
+const m = (u: User, department: string, status: Member['status'], lastDays: number | null, invitedDays: number, gb: number, invitedBy?: string): Member =>
+  ({ ...u, department, status, lastActiveAt: lastDays === null ? null : d(lastDays, 9 + (invitedDays % 8)), invitedAt: d(invitedDays), invitedBy, storageUsed: gb * 1024 ** 3 })
+const person = (id: string, name: string, isAdmin = false): User =>
+  ({ id, name, email: `${name.toLowerCase().replace(' ', '.')}@harbourandhills.com`, isAdmin })
+export const members: Member[] = [
+  m(alok, 'Leadership', 'active', 0, 400, 38.2),
+  m(priya, 'Finance', 'active', 0, 380, 64.5, 'Alok Desai'),
+  m(daniel, 'Legal', 'active', 1, 360, 41.9, 'Alok Desai'),
+  m(mei, 'People & Culture', 'active', 2, 300, 22.4, 'Alok Desai'),
+  m(rohan, 'Technology', 'active', 0, 290, 57.1, 'Alok Desai'),
+  m(person('u6', 'Sara Khan', true), 'Technology', 'active', 0, 280, 12.8, 'Alok Desai'),
+  m(person('u7', 'James Wong'), 'Finance', 'active', 4, 210, 9.3, 'Priya Shah'),
+  m(person('u8', 'Ananya Iyer'), 'Legal', 'active', 12, 200, 6.1, 'Daniel Okafor'),
+  m(person('u9', 'Tom Fletcher'), 'Operations', 'active', 34, 190, 3.4, 'Alok Desai'),
+  m(person('u10', 'Lucia Romero'), 'Marketing', 'active', 1, 150, 18.7, 'Alok Desai'),
+  m(person('u11', 'Kenji Sato'), 'Operations', 'active', 41, 140, 1.2, 'Sara Khan'),
+  m(person('u12', 'Hannah Becker'), 'Finance', 'invited', null, 3, 0, 'Priya Shah'),
+  m(person('u13', 'Omar Haddad'), 'Technology', 'invited', null, 9, 0, 'Sara Khan'),
+  m(person('u14', 'Grace Mensah'), 'People & Culture', 'deactivated', 96, 330, 4.5, 'Mei Lin'),
+  m(person('u15', 'Victor Lam'), 'Legal', 'deactivated', 120, 310, 2.2, 'Daniel Okafor'),
+]
+
+export const documentTypes: DocumentType[] = [
+  { id: 't1', name: 'Contract', color: '#023e63', description: 'Agreements, NDAs, leases and addenda', documentCount: 412 },
+  { id: 't2', name: 'Policy', color: '#00bfb3', description: 'Internal policies and handbooks', documentCount: 168 },
+  { id: 't3', name: 'Report', color: '#6366f1', description: 'Management accounts, reviews and board packs', documentCount: 2304 },
+  { id: 't4', name: 'General', color: '#94a3b8', description: 'Anything that doesn’t fit another type', documentCount: 9596 },
+]
+
+export const settings: WorkspaceSettings = {
+  workspaceName: 'Harbour & Hills', domain: 'harbourandhills.com', sessionTimeoutHours: 12,
+  defaultShareRole: 'viewer', allowPublicLinks: false, requireReview: true,
+  statusLabels: { draft: 'Draft', in_review: 'In review', approved: 'Approved' },
+  trashRetentionDays: 30, versionsToKeep: null, autoArchiveDays: 365, storageQuotaGb: 1000, emailDigest: 'daily',
+}
+
+// Text pulled from inside files, so search can show where a term matched (backend: full-text index).
+export const excerpts: Record<string, string> = {
+  d1: 'Our 2027 priorities: grow recurring revenue, consolidate the Hong Kong and Singapore offices, and complete the move to a single document workspace.',
+  d2: 'TechFuse collection terms: payment within 30 days of invoice, data retained for seven years, termination with 90 days written notice.',
+  d3: 'The navy and teal palette is used sparingly. Logo clear space equals the height of the H crossbar. Inter is the brand typeface.',
+  d11: 'Q3 revenue ahead of budget by 4.2%. Operating costs flat. Cash position strong after the lease renewal deposit.',
+  d12: 'Draft budget for FY27 assumes 6% headcount growth and a 12% increase in technology spend, mainly cloud storage and security.',
+  d13: 'Treasury policy: surplus cash is held across at least three banks. No single counterparty above 40% of total deposits.',
+  d15: 'Cash flow forecast for the next 13 weeks, including the lease renewal deposit and quarterly tax payments.',
+  d21: 'Master services agreement between Harbour & Hills and Acme Ltd. Term of three years with automatic renewal unless terminated.',
+  d22: 'Mutual non-disclosure agreement template. Confidential information excludes anything already public or independently developed.',
+  d23: 'Lease renewal for the Hong Kong office, Level 12. Five year term, rent review in year three, break clause after year two.',
+  d24: 'Data processing addendum covering personal data, sub-processors, breach notification within 72 hours and data retention.',
+  d31: 'Architecture overview: documents are stored encrypted at rest, access is checked on every request, and every action is written to the audit log.',
+  d33: 'Incident runbook: who to call, how to revoke access quickly, and how to restore a file from version history.',
+  d41: 'Employee handbook covering leave, expenses, security and the code of conduct. Read alongside the leave policy.',
+  d42: 'Leave policy 2027: 22 days annual leave, rising to 25 after three years. Carry over up to five days into the next year.',
+  d111: 'Engagement letter for the FY2026 audit. Fieldwork in January, final report due by the end of March.',
+}
+
+// Archived: put away, read-only, kept indefinitely
+const removed = (item: Item, by: User, days: number, originalPath: string[], auto = false): RemovedItem =>
+  ({ item: { ...item, archived: true }, removedBy: by, removedAt: d(days, 15), originalPath, auto })
+export const archived: RemovedItem[] = [
+  removed(folder('fa1', 'FY2024 Audit', 'f1', 14, priya, 210), priya, 40, ['Finance']),
+  removed(folder('fa2', 'Old Branding 2022', null, 38, mei, 400), mei, 95, []),
+  removed(doc('da1', 'Board Pack – Q4 2025.pdf', 'f5', 'Report', 'approved', 8400, 3, alok, 300), alok, 12, ['Board Papers']),
+  removed(doc('da2', 'Office Lease 2021–2026.pdf', 'f2', 'Contract', 'approved', 5200, 2, daniel, 500), daniel, 6, ['Legal & Contracts']),
+  removed(doc('da3', 'Expense Policy 2024.docx', 'f1', 'Policy', 'approved', 88, 4, priya, 420), priya, 60, ['Finance']),
+  removed(doc('da4', 'Vendor Payments Q1 2025.csv', 'f1', 'General', 'approved', 52, 1, mei, 560), alok, 3, ['Finance'], true),
+  removed(doc('da5', 'Network Diagram v2.pdf', 'f3', 'General', 'approved', 2900, 2, rohan, 470), alok, 3, ['Technology and Data'], true),
+  removed(doc('da6', 'Recruitment Plan 2025.xlsx', 'f4', 'Report', 'approved', 310, 6, mei, 380), mei, 22, ['HR & People']),
+]
+
+// Trash: deleted, restorable until the retention period (Settings) runs out
+export const trash: RemovedItem[] = [
+  removed(doc('dt1', 'Budget FY27 – Draft v1.xlsx', 'f1', 'General', 'draft', 270, 1, daniel, 9), daniel, 1, ['Finance']),
+  removed(doc('dt2', 'NDA – Acme (unsigned).docx', 'f2', 'Contract', 'draft', 61, 2, daniel, 30), daniel, 4, ['Legal & Contracts']),
+  removed(folder('ft1', 'Scratch – Rohan', 'f3', 7, rohan, 40), rohan, 9, ['Technology and Data']),
+  removed(doc('dt3', 'Team Offsite Photos.zip', null, 'General', 'draft', 184000, 1, mei, 60), mei, 17, []),
+  removed(doc('dt4', 'Leave Policy 2026 (old).docx', 'f4', 'Policy', 'approved', 58, 3, mei, 200), mei, 24, ['HR & People']),
+  removed(doc('dt5', 'Copy of Treasury Policy.docx', 'f1', 'Policy', 'draft', 96, 1, priya, 31), priya, 27, ['Finance']),
+  removed(doc('dt6', 'Untitled spreadsheet.xlsx', 'f1', 'General', 'draft', 12, 1, priya, 29), priya, 29, ['Finance']),
+]
+
+// Alerts for the signed-in user (Alok)
+const tgt = (id: string): Notification['target'] => {
+  const i = items.find(x => x.id === id)!
+  const parent = i.kind === 'folder' ? i.parentId : i.folderId
+  const path: string[] = []; let f = items.find(x => x.id === parent) as Folder | undefined
+  while (f) { path.unshift(f.name); f = items.find(x => x.id === f!.parentId) as Folder | undefined }
+  return { id: i.id, name: i.name, kind: i.kind, folderId: parent, path }
+}
+const n = (id: string, hoursAgo: number, read: boolean, event: AlertEvent, actor: User, target: string, because: string, detail?: string): Notification =>
+  ({ id, at: new Date(Date.parse('2026-10-13T12:00:00Z') - hoursAgo * 3600000).toISOString(), read, event, actor, target: tgt(target), because, detail })
+export const notifications: Notification[] = [
+  n('n1', 1, false, 'uploaded', priya, 'd11', 'Finance', 'Version 3'),
+  n('n2', 3, false, 'status', daniel, 'd23', 'Legal & Contracts', 'Draft → In review'),
+  n('n3', 5, false, 'shared', daniel, 'f2', 'Legal & Contracts', 'with Mei Lin as Viewer'),
+  n('n4', 22, true, 'changed', rohan, 'd33', 'Incident Runbook.md', 'Version 9'),
+  n('n5', 26, true, 'uploaded', priya, 'd112', 'Finance', 'New file'),
+  n('n6', 30, true, 'status', alok, 'd1', 'Group Strategy 2027.pdf', 'In review → Approved'),
+  n('n7', 52, true, 'deleted', daniel, 'd24', 'Legal & Contracts', 'Moved to trash'),
+  n('n8', 75, true, 'changed', daniel, 'd12', 'Finance', 'Version 7'),
+  n('n9', 98, true, 'shared', mei, 'f4', 'HR & People', 'with Rohan Mehta as Editor'),
+  n('n10', 140, true, 'uploaded', mei, 'd42', 'HR & People', 'New file'),
+  n('n11', 190, true, 'status', priya, 'd13', 'Finance', 'In review → Approved'),
+]
+
+const allOn: Record<AlertEvent, boolean> = { uploaded: true, changed: true, status: true, shared: true, deleted: true }
+const sub = (id: string, target: string, events: Partial<Record<AlertEvent, boolean>>, email: boolean): Subscription => {
+  const t = tgt(target); return { id, target: { id: t.id, name: t.name, kind: t.kind, path: t.path }, events: { ...allOn, ...events }, email }
+}
+export const subscriptions: Subscription[] = [
+  sub('s1', 'f1', {}, true),
+  sub('s2', 'f2', { changed: false }, true),
+  sub('s3', 'f4', { changed: false, status: false }, false),
+  sub('s4', 'd1', {}, true),
+  sub('s5', 'd33', { shared: false, deleted: false }, false),
+]
+export const alertPrefs: AlertPrefs = { emailMode: 'daily' }

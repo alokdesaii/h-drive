@@ -97,7 +97,7 @@ export default function Dashboard() {
       <div className="mt-5 grid grid-cols-3 gap-5">
         {/* Storage ring */}
         <Card>
-          <CardHead icon={HardDrive} title="Storage" right={<Link to="/settings" className="rounded-sm border border-line px-3 py-1 text-[12px] font-medium hover:border-navy/30 hover:text-accent">1 TB plan</Link>} />
+          <CardHead icon={HardDrive} title="Storage" right={<Link to="/settings?section=retention" className="rounded-sm border border-line px-3 py-1 text-[12px] font-medium hover:border-navy/30 hover:text-accent">1 TB plan</Link>} />
           <Ring used={STORAGE.used} total={STORAGE.total} />
           <div className="mx-auto mt-3 w-fit rounded-sm border border-line px-3 py-1 text-[12px] text-fg/70">
             Finance grew <span className="font-medium text-teal-fg">+6.2 GB</span> this week

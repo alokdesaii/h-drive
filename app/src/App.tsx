@@ -7,20 +7,30 @@ import {
 import Documents from './pages/Documents'
 import AccessPage from './pages/AccessPage'
 import AuditPage from './pages/AuditPage'
+import UsersPage from './pages/UsersPage'
+import SettingsPage from './pages/SettingsPage'
+import SearchPage from './pages/SearchPage'
+import RemovedPage from './pages/RemovedPage'
+import { AlertsPage, ManageAlertsPage } from './pages/AlertsPages'
+import { UNREAD_COUNT } from './api'
+import { setViewAs, useMe, useViewAs } from './session'
+import { AdminOnlyPage, NotFoundPage } from './pages/ErrorPages'
+import MyDashboard from './pages/MyDashboard'
+import { initials } from './ui'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
 import { Menu, MenuDivider, MenuItem } from './ui'
 
 const nav = [
   { group: null, items: [
-    { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/documents', label: 'Documents', icon: Folder },
     { to: '/search', label: 'Search', icon: Search },
     { to: '/archived', label: 'Archived', icon: Archive },
     { to: '/trash', label: 'Trash', icon: Trash2 },
   ]},
   { group: 'Alerts', items: [
-    { to: '/alerts', label: 'Alerts', icon: Bell, badge: 3 },
+    { to: '/alerts', label: 'Alerts', icon: Bell, badge: UNREAD_COUNT },
     { to: '/alerts/manage', label: 'Manage alerts', icon: BellRing },
   ]},
   { group: 'Admin', items: [
@@ -30,9 +40,10 @@ const nav = [
     { to: '/settings', label: 'Settings', icon: Settings },
   ]},
 ]
-const allItems = nav.flatMap(g => g.items)
 
 function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
+  const me = useMe()
+  const groups = nav.filter(g => g.group !== 'Admin' || me.isAdmin)
   return (
     <aside className={`${collapsed ? 'w-[68px]' : 'w-60'} shrink-0 bg-navy text-paper flex flex-col transition-[width] duration-200`}>
       <div className="h-16 flex items-center gap-2.5 px-5">
@@ -40,7 +51,7 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
         {!collapsed && <span className="font-semibold tracking-tight text-[15px]">H Drive</span>}
       </div>
       <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-6">
-        {nav.map((g, i) => (
+        {groups.map((g, i) => (
           <div key={i}>
             {g.group && !collapsed && (
               <div className="px-2 pb-2 text-[11px] font-medium uppercase tracking-wider text-paper/45">{g.group}</div>
@@ -50,7 +61,7 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
                 <li key={to}>
                   <NavLink
                     to={to}
-                    end={to === '/' || to === '/alerts'}
+                    end={to === '/alerts'}
                     title={collapsed ? label : undefined}
                     className={({ isActive }) =>
                       `group relative flex items-center gap-3 rounded-md px-2.5 h-9 text-[13.5px] transition-colors ${
@@ -122,9 +133,15 @@ function ThemeToggle() {
 
 function Topbar() {
   const navigate = useNavigate()
+  const me = useMe(), viewAs = useViewAs()
+  // ⌘K / Ctrl+K anywhere opens Search
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); navigate('/search') } }
+    document.addEventListener('keydown', k); return () => document.removeEventListener('keydown', k)
+  }, [navigate])
   return (
     <header className="h-16 shrink-0 border-b border-line flex items-center gap-4 px-8">
-      <button className="flex h-9 w-full max-w-md items-center gap-2.5 rounded-md border border-line bg-surface px-3 text-[13px] text-muted hover:border-muted/60">
+      <button onClick={() => navigate('/search')} className="flex h-9 w-full max-w-md items-center gap-2.5 rounded-md border border-line bg-surface px-3 text-[13px] text-muted hover:border-muted/60">
         <Search size={15} />
         <span className="flex-1 text-left">Search files, folders, people…</span>
         <kbd className="rounded border border-line px-1.5 text-[11px] font-sans">⌘K</kbd>
@@ -138,15 +155,22 @@ function Topbar() {
         <div className="mx-2 h-6 w-px bg-line" />
         <Menu trigger={
           <button className="flex items-center gap-2.5 rounded-md py-1 pl-1 pr-2 hover:bg-mist">
-            <span className="grid h-8 w-8 place-items-center rounded-sm bg-navy text-[12px] font-medium text-paper">AD</span>
+            <span className="grid h-8 w-8 place-items-center rounded-sm bg-navy text-[12px] font-medium text-paper">{initials(me)}</span>
             <span className="text-left leading-tight">
-              <span className="block text-[13px] font-medium">Alok Desai</span>
-              <span className="block text-[11px] text-muted">Administrator</span>
+              <span className="block text-[13px] font-medium">{me.name}</span>
+              <span className="block text-[11px] text-muted">{me.isAdmin ? 'Administrator' : 'Member'}</span>
             </span>
             <ChevronDown size={14} className="text-muted" />
           </button>
         }>
-          <div className="px-2.5 py-2 text-[12px] text-muted">alok.desai@harbourandhills.com</div>
+          <div className="px-2.5 py-2 text-[12px] text-muted">{me.email}</div>
+          <MenuDivider />
+          {/* Prototype only: preview the app as an admin or a regular member */}
+          <div className="px-2.5 pb-1 pt-1.5 text-[10.5px] font-semibold uppercase tracking-wider text-muted">View as (prototype)</div>
+          {(['admin', 'member'] as const).map(v => (
+            <MenuItem key={v} icon={v === 'admin' ? ShieldCheck : Users} hint={viewAs === v ? '✓' : undefined}
+              onClick={() => { setViewAs(v); navigate('/dashboard') }}>{v === 'admin' ? 'Admin · Alok Desai' : 'Member · Priya Shah'}</MenuItem>
+          ))}
           <MenuDivider />
           {/* Backend: POST /auth/logout, then redirect here */}
           <MenuItem icon={LogOut} onClick={() => navigate('/login')}>Sign out</MenuItem>
@@ -156,25 +180,12 @@ function Topbar() {
   )
 }
 
-// ponytail: placeholder until each screen is built
-function Placeholder() {
-  const { pathname } = useLocation()
-  const item = allItems.find(i => i.to === pathname)
-  return (
-    <div className="px-8 py-8">
-      <h1 className="text-[22px] font-semibold tracking-tight">{item?.label ?? 'Not found'}</h1>
-      <p className="mt-1 text-[13px] text-muted">Screen coming in the next step.</p>
-      <div className="mt-8 grid h-64 place-items-center rounded-lg border border-dashed border-line text-[13px] text-muted">
-        {item?.label}
-      </div>
-    </div>
-  )
-}
-
 export default function App() {
   const [collapsed, setCollapsed] = useState(false)
   // Sign-in page sits outside the app shell. ponytail: no auth guard yet, the backend adds the redirect for signed-out users.
-  if (useLocation().pathname === '/login') return <Login />
+  const { pathname } = useLocation()
+  const me = useMe()
+  if (pathname === '/' || pathname === '/login') return <Login />
   return (
     <div className="flex h-full">
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} />
@@ -183,10 +194,17 @@ export default function App() {
         <main className="flex-1 overflow-y-auto">
           <Routes>
             <Route path="/documents/:folderId?" element={<Documents />} />
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/access" element={<AccessPage />} />
-            <Route path="/audit" element={<AuditPage />} />
-            <Route path="*" element={<Placeholder />} />
+            <Route path="/dashboard" element={me.isAdmin ? <Dashboard /> : <MyDashboard />} />
+            <Route path="/access" element={me.isAdmin ? <AccessPage /> : <AdminOnlyPage />} />
+            <Route path="/audit" element={me.isAdmin ? <AuditPage /> : <AdminOnlyPage />} />
+            <Route path="/users" element={me.isAdmin ? <UsersPage /> : <AdminOnlyPage />} />
+            <Route path="/settings" element={me.isAdmin ? <SettingsPage /> : <AdminOnlyPage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/archived" element={<RemovedPage key="archived" mode="archived" />} />
+            <Route path="/trash" element={<RemovedPage key="trash" mode="trash" />} />
+            <Route path="/alerts" element={<AlertsPage />} />
+            <Route path="/alerts/manage" element={<ManageAlertsPage />} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
       </div>

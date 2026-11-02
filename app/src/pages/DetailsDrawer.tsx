@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Archive, Bell, Download, Eye, Link2, MoreHorizontal, Pencil, RotateCcw, Share2, Trash2, Upload, X } from 'lucide-react'
+import { Archive, Bell, BellRing, Download, Eye, FolderInput, Link2, MoreHorizontal, Pencil, RotateCcw, Share2, Trash2, Upload, X } from 'lucide-react'
+import type { FileActions } from '../fileActions'
 import { folderPath, getItem, listAccess, listActivity, listVersions } from '../api'
 import type { AccessGrant, Activity, Item, Version } from '../types'
 import { Avatar, Button, ItemIcon, Menu, MenuDivider, MenuItem, StatusBadge, fmtDateTime, fmtSize } from '../ui'
@@ -7,8 +8,8 @@ import { Avatar, Button, ItemIcon, Menu, MenuDivider, MenuItem, StatusBadge, fmt
 const TABS = ['Details', 'Versions', 'Access', 'Activity'] as const
 type Tab = typeof TABS[number]
 
-export function DetailsDrawer({ id, onClose }: { id: string; onClose: () => void }) {
-  const item = getItem(id)
+export function DetailsDrawer({ id, item: live, act, onClose }: { id: string; item?: Item; act: FileActions; onClose: () => void }) {
+  const item = live ?? getItem(id)
   const [tab, setTab] = useState<Tab>('Details')
 
   useEffect(() => {
@@ -38,16 +39,17 @@ export function DetailsDrawer({ id, onClose }: { id: string; onClose: () => void
           </div>
           <div className="mt-4 flex items-center gap-1">
             {item.kind === 'document' && <Button variant="primary"><Eye size={15} /> Open</Button>}
-            {item.kind === 'document' && <IconBtn icon={Download} label="Download" />}
-            <IconBtn icon={Share2} label="Share" />
-            <IconBtn icon={Link2} label="Copy link" />
-            <IconBtn icon={Bell} label="Alert me" />
+            {item.kind === 'document' && <IconBtn icon={Download} label="Download" onClick={() => act.download([item])} />}
+            <IconBtn icon={Share2} label="Share" onClick={() => act.share(item)} />
+            <IconBtn icon={Link2} label="Copy link" onClick={() => act.copyLink(item)} />
+            <IconBtn icon={act.isFollowing(item) ? BellRing : Bell} label={act.isFollowing(item) ? 'Stop alerts' : 'Alert me'} active={act.isFollowing(item)} onClick={() => act.toggleFollow(item)} />
             <Menu trigger={<IconBtn icon={MoreHorizontal} label="More" />}>
-              <MenuItem icon={Pencil}>Rename</MenuItem>
-              {item.kind === 'document' && <MenuItem icon={Upload}>Upload new version</MenuItem>}
-              <MenuItem icon={Archive}>Archive</MenuItem>
+              <MenuItem icon={Pencil} onClick={() => act.rename(item)}>Rename</MenuItem>
+              <MenuItem icon={FolderInput} onClick={() => act.move([item])}>Move</MenuItem>
+              {item.kind === 'document' && <MenuItem icon={Upload} onClick={() => act.uploadVersion(item)}>Upload new version</MenuItem>}
+              <MenuItem icon={Archive} onClick={() => act.archive([item])}>Archive</MenuItem>
               <MenuDivider />
-              <MenuItem icon={Trash2} danger>Move to trash</MenuItem>
+              <MenuItem icon={Trash2} danger onClick={() => act.trash([item])}>Move to trash</MenuItem>
             </Menu>
           </div>
           <div className="mt-5 flex gap-5 border-b border-line">
@@ -70,8 +72,9 @@ export function DetailsDrawer({ id, onClose }: { id: string; onClose: () => void
   )
 }
 
-const IconBtn = ({ icon: I, label }: { icon: typeof X; label: string }) =>
-  <button title={label} aria-label={label} className="grid h-9 w-9 place-items-center rounded-md text-fg/70 hover:bg-mist hover:text-fg"><I size={16} strokeWidth={1.75} /></button>
+const IconBtn = ({ icon: I, label, onClick, active }: { icon: typeof X; label: string; onClick?: () => void; active?: boolean }) =>
+  <button onClick={onClick} title={label} aria-label={label} aria-pressed={active}
+    className={`grid h-9 w-9 place-items-center rounded-md ${active ? 'bg-teal/15 text-teal-fg' : 'text-fg/70 hover:bg-mist hover:text-fg'}`}><I size={16} strokeWidth={1.75} /></button>
 
 function Details({ item }: { item: Item }) {
   const rows: [string, React.ReactNode][] = item.kind === 'document' ? [

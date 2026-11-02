@@ -21,7 +21,7 @@ export default function Login() {
 
   const signIn = () => {
     setLoading(true)
-    setTimeout(() => navigate('/'), 1200) // ponytail: mock redirect; backend replaces with the Google OAuth flow
+    setTimeout(() => navigate('/dashboard'), 1200) // ponytail: mock redirect; backend replaces with the Google OAuth flow
   }
 
   return (

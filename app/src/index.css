@@ -65,3 +65,17 @@ body {
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .login-form { background: #000c14; }
 }
+
+/* Navy hero banner with a fading dot grid (Settings section headers; same family as the Dashboard "Needs review" card) */
+.brand-banner { background: linear-gradient(120deg, #023e63 0%, #012a45 70%, #011b2e 100%); }
+.brand-banner::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(rgba(255,255,255,0.22) 1px, transparent 1.3px);
+  background-size: 14px 14px;
+  -webkit-mask-image: radial-gradient(circle at 100% 0%, #000, transparent 55%);
+          mask-image: radial-gradient(circle at 100% 0%, #000, transparent 55%);
+}
+.brand-banner::after {
+  content: ""; position: absolute; right: -60px; top: -80px; width: 260px; height: 260px; border-radius: 9999px;
+  background: rgba(0,191,179,0.18); filter: blur(60px); pointer-events: none;
+}
