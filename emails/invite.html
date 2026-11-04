@@ -1,0 +1,106 @@
+<!doctype html>
+<!--
+  H Drive invite email. Sent by POST /admin/users/invite.
+  Placeholders: {{inviteeFirstName}} {{inviterName}} {{inviterEmail}} {{role}} {{signInUrl}} {{expiresOn}} {{inviteeEmail}}
+  Built for email clients: tables + inline styles, 600px wide, no SVG/web fonts required (Inter falls back to Arial).
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+  <title>You're invited to H Drive</title>
+  <style>
+    @media (max-width: 620px) {
+      .container { width: 100% !important; }
+      .px { padding-left: 24px !important; padding-right: 24px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0; background:#f1f5f9;">
+  <!-- Preheader: the grey preview line in the inbox -->
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0;">{{inviterName}} invited you to H Drive, Harbour &amp; Hills' document workspace.</div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f1f5f9;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+        <table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px; max-width:600px; font-family:Inter, Arial, Helvetica, sans-serif;">
+
+          <!-- Navy header with wordmark -->
+          <tr>
+            <td class="px" style="background:#023e63; border-radius:10px 10px 0 0; padding:32px 40px; border-bottom:3px solid #00bfb3;">
+              <!-- PNG of app/public/logo-light.svg (email apps don't show SVG); served from the app once deployed -->
+              <img src="https://h-drive.vercel.app/logo-email.png" width="72" height="73" alt="H Drive" style="display:block; border:0; width:72px; height:auto; color:#ffffff; font-size:20px; font-weight:600;">
+              <p style="margin:28px 0 0; font-size:13px; color:#00bfb3;">You're invited</p>
+              <h1 style="margin:6px 0 0; font-size:26px; line-height:1.25; font-weight:600; color:#ffffff; letter-spacing:-0.4px;">Hi {{inviteeFirstName}}, your files have a new home</h1>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td class="px" style="background:#ffffff; padding:36px 40px 8px; color:#020617;">
+              <p style="margin:0; font-size:15px; line-height:1.6;">
+                <strong>{{inviterName}}</strong> has invited you to <strong>H Drive</strong>, the Harbour &amp; Hills workspace for every file, folder and review.
+              </p>
+
+              <!-- Role card -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0; background:#f1f5f9; border-radius:6px;">
+                <tr>
+                  <td style="padding:16px 20px; font-size:13px; line-height:1.6; color:#020617;">
+                    <span style="color:#64748b;">Your role</span><br>
+                    <strong style="font-size:15px;">{{role}}</strong>
+                  </td>
+                  <td align="right" style="padding:16px 20px; font-size:13px; line-height:1.6; color:#020617;">
+                    <span style="color:#64748b;">Sign in with</span><br>
+                    <strong style="font-size:15px;">{{inviteeEmail}}</strong>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Button (bulletproof: works in Outlook too) -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="border-radius:6px; background:#00bfb3;">
+                    <a href="{{signInUrl}}" style="display:inline-block; padding:14px 28px; font-size:15px; font-weight:600; color:#000c14; text-decoration:none; border-radius:6px;">Sign in with Google &rarr;</a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:20px 0 0; font-size:13px; line-height:1.6; color:#64748b;">
+                Use your <strong style="color:#020617;">@harbourandhills.com</strong> Google account. Personal Gmail accounts can't sign in.
+                This invite expires on <strong style="color:#020617;">{{expiresOn}}</strong>.
+              </p>
+            </td>
+          </tr>
+
+          <!-- What you can do -->
+          <tr>
+            <td class="px" style="background:#ffffff; padding:28px 40px 36px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #e2e8f0;">
+                <tr>
+                  <td style="padding-top:24px; font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#94a3b8;">In H Drive you can</td>
+                </tr>
+                <tr><td style="padding-top:12px; font-size:14px; line-height:1.6; color:#020617;"><span style="color:#00bfb3; font-weight:700;">&#9632;</span>&nbsp; Find any file, folder or text inside a document</td></tr>
+                <tr><td style="padding-top:6px; font-size:14px; line-height:1.6; color:#020617;"><span style="color:#00bfb3; font-weight:700;">&#9632;</span>&nbsp; Share securely and keep every version</td></tr>
+                <tr><td style="padding-top:6px; font-size:14px; line-height:1.6; color:#020617;"><span style="color:#00bfb3; font-weight:700;">&#9632;</span>&nbsp; Review and approve documents in one click</td></tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td class="px" style="background:#000c14; border-radius:0 0 10px 10px; padding:24px 40px; font-size:12px; line-height:1.6; color:#94a3b8;">
+              Not expecting this? You can ignore it, or ask <a href="mailto:{{inviterEmail}}" style="color:#00bfb3; text-decoration:none;">{{inviterName}}</a>.<br>
+              If the button doesn't work, paste this link into your browser:<br>
+              <a href="{{signInUrl}}" style="color:#ffffff; word-break:break-all;">{{signInUrl}}</a>
+              <p style="margin:16px 0 0; color:#475569;">Harbour &amp; Hills · Internal use only</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -19,6 +19,7 @@ import MyDashboard from './pages/MyDashboard'
 import { initials } from './ui'
 import Dashboard from './pages/Dashboard'
 import Login from './pages/Login'
+import DocumentPage from './pages/DocumentPage'
 import { Menu, MenuDivider, MenuItem } from './ui'
 
 const nav = [
@@ -199,6 +200,7 @@ export default function App() {
             <Route path="/audit" element={me.isAdmin ? <AuditPage /> : <AdminOnlyPage />} />
             <Route path="/users" element={me.isAdmin ? <UsersPage /> : <AdminOnlyPage />} />
             <Route path="/settings" element={me.isAdmin ? <SettingsPage /> : <AdminOnlyPage />} />
+            <Route path="/file/:id" element={<DocumentPage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/archived" element={<RemovedPage key="archived" mode="archived" />} />
             <Route path="/trash" element={<RemovedPage key="trash" mode="trash" />} />

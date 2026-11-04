@@ -80,7 +80,7 @@ Light, Dark or System (default), from the switch in the top bar.
 | Settings (admin) | `/settings?section=general\|sharing\|types\|review\|retention\|notifications` | ✅ |
 | Pop-ups: New folder, Upload + progress, Share, Move, Rename, Trash, Archive, Invite, Deactivate, Document types | (inside the pages above) | ✅ |
 | Errors: 404, admins only, no access + request | any unknown address · admin page as member · restricted folder | ✅ |
-| Full-page document view ("Open") | | ⏳ Not designed |
+| Document view ("Open"): preview, review bar, details | `/file/:id` | ✅ |
 
 ## Design language
 
@@ -120,7 +120,7 @@ app/src/
 Auth & me        GET /auth/google · POST /auth/logout · GET /me · GET /me/home
 Documents        GET /folders · GET /folders/:id/items · GET /folders/:id/path
                  POST /folders · POST /uploads · PATCH /items/:id · POST /items/:id/archive · POST /items/:id/trash
-                 GET /documents/:id/versions · POST /documents/:id/review
+                 GET /items/:id · GET /documents/:id/preview?page= · GET /documents/:id/versions · POST /documents/:id/review
 Access           GET /items/:id/access · POST /items/:id/share · POST /items/:id/access-requests
 Search           GET /search?q=&type=&status=&folder=&within=&sort= · GET /search/recent
 Archived/Trash   GET /archived · GET /trash · POST /items/:id/restore · DELETE /items/:id · DELETE /trash

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Archive, Bell, BellRing, Download, Eye, FolderInput, Link2, MoreHorizontal, Pencil, RotateCcw, Share2, Trash2, Upload, X } from 'lucide-react'
 import type { FileActions } from '../fileActions'
 import { folderPath, getItem, listAccess, listActivity, listVersions } from '../api'
@@ -38,7 +39,7 @@ export function DetailsDrawer({ id, item: live, act, onClose }: { id: string; it
             <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-md text-muted hover:bg-mist hover:text-fg" aria-label="Close"><X size={17} /></button>
           </div>
           <div className="mt-4 flex items-center gap-1">
-            {item.kind === 'document' && <Button variant="primary"><Eye size={15} /> Open</Button>}
+            {item.kind === 'document' && <Link to={`/file/${item.id}`} className="inline-flex h-9 items-center gap-2 rounded-md bg-navy px-3.5 text-[13px] font-medium text-paper hover:brightness-110"><Eye size={15} /> Open</Link>}
             {item.kind === 'document' && <IconBtn icon={Download} label="Download" onClick={() => act.download([item])} />}
             <IconBtn icon={Share2} label="Share" onClick={() => act.share(item)} />
             <IconBtn icon={Link2} label="Copy link" onClick={() => act.copyLink(item)} />
@@ -76,7 +77,7 @@ const IconBtn = ({ icon: I, label, onClick, active }: { icon: typeof X; label: s
   <button onClick={onClick} title={label} aria-label={label} aria-pressed={active}
     className={`grid h-9 w-9 place-items-center rounded-md ${active ? 'bg-teal/15 text-teal-fg' : 'text-fg/70 hover:bg-mist hover:text-fg'}`}><I size={16} strokeWidth={1.75} /></button>
 
-function Details({ item }: { item: Item }) {
+export function Details({ item, preview = true }: { item: Item; preview?: boolean }) {
   const rows: [string, React.ReactNode][] = item.kind === 'document' ? [
     ['Type', item.type],
     ['Status', <StatusBadge status={item.status} />],
@@ -102,7 +103,7 @@ function Details({ item }: { item: Item }) {
           </div>
         ))}
       </dl>
-      {item.kind === 'document' && (
+      {preview && item.kind === 'document' && (
         <div className="mt-6 grid h-44 place-items-center rounded-lg border border-line bg-mist text-[12px] text-muted">
           <div className="text-center"><ItemIcon item={item} size={28} /><div className="mt-2">Preview</div></div>
         </div>
@@ -121,7 +122,7 @@ function useLoad<T>(fn: () => Promise<T>, deps: unknown[]) {
   return v
 }
 
-function Versions({ id }: { id: string }) {
+export function Versions({ id }: { id: string }) {
   const versions = useLoad<Version[]>(() => listVersions(id), [id])
   if (!versions) return <Loading />
   return (
@@ -183,7 +184,7 @@ const VERBS: Record<string, string> = {
 }
 const verb = (a: string) => VERBS[a] ?? a
 
-function ActivityList({ id }: { id: string }) {
+export function ActivityList({ id }: { id: string }) {
   const acts = useLoad<Activity[]>(() => listActivity(id), [id])
   if (!acts) return <Loading />
   return (
