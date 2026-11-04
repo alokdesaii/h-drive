@@ -29,7 +29,8 @@
 
           <!-- Navy header with wordmark -->
           <tr>
-            <td class="px" style="background:#023e63; border-radius:10px 10px 0 0; padding:32px 40px; border-bottom:3px solid #00bfb3;">
+            <!-- Dot texture from the sign-in page (still frame). Clients that block background images (classic Outlook) show plain navy. -->
+            <td class="px" bgcolor="#023e63" background="https://h-drive.vercel.app/email-header.jpg" style="background:#023e63 url('https://h-drive.vercel.app/email-header.jpg') center top / cover no-repeat; border-radius:10px 10px 0 0; padding:32px 40px; border-bottom:3px solid #00bfb3;">
               <!-- PNG of app/public/logo-light.svg (email apps don't show SVG); served from the app once deployed -->
               <img src="https://h-drive.vercel.app/logo-email.png" width="72" height="73" alt="H Drive" style="display:block; border:0; width:72px; height:auto; color:#ffffff; font-size:20px; font-weight:600;">
               <p style="margin:28px 0 0; font-size:13px; color:#00bfb3;">You're invited</p>
